@@ -1,41 +1,31 @@
-import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Profile from './components/Profile';
-import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import PostsList from './components/PostList';
-import CreatePost from './components/CreatePost';
+import LoginPage from './pages/LoginPage';
 import Notifications from './components/Notifications';
+import Profile from './components/Profile';
+import CreatePost from './components/CreatePost';
+import HomePage from './pages/HomePage';
+import PostsList from './components/PostList';
 
-const App = () => {
-  const token = localStorage.getItem('token');
+
+function App() {
+  const isAuthenticated = !!localStorage.getItem('token');
 
   return (
     <Router>
-      {token && <Navbar />}
+      <Navbar />
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route
-          path="/"
-          element={token ? <PostsList /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/create"
-          element={token ? <CreatePost /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/notifications"
-          element={token ? <Notifications /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/profile"
-          element={token ? <Profile /> : <Navigate to="/login" />}
-        />
+        <Route path="/signin" element={<LoginPage />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/posts" element={<PostsList />} />
+        {isAuthenticated && <Route path="/create-post" element={<CreatePost />} />}
       </Routes>
     </Router>
   );
-};
+}
 
 export default App;
