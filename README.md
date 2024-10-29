@@ -46,8 +46,8 @@ The server provides several RESTful API endpoints:
 ### Steps
 ### 1. Clone the Repository
    ```bash
-   https://github.com/thabir303/Stack-OverFlow-2.0.git
-   cd Stack-OverFlow-2.0
+   https://github.com/thabir303/Stack-OverFlow2.0.git
+   cd Stack-OverFlow2.0
    ```
 ### 2. Install Backend Dependencies
 ```bash
