@@ -11,7 +11,7 @@ const PostsList = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/posts/getPost');
+        const response = await axios.get('http://localhost:8001/api/posts/getPost');
         setPosts(response.data.posts);
       } catch (error) {
         console.error('Error fetching posts:', error);
@@ -70,7 +70,7 @@ const PostsList = () => {
               rel="noopener noreferrer"
               className="text-blue-600 underline hover:text-blue-800"
             >
-              Download File
+              View File
             </a>
           )}
         </div>

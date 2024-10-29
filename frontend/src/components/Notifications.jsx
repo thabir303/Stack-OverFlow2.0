@@ -8,7 +8,7 @@ const Notifications = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/notifications', {
+        const response = await axios.get('http://localhost:8001/api/notifications', {
             headers: {
               Authorization: `Bearer ${token}`, 
             },
@@ -25,7 +25,7 @@ const Notifications = () => {
 
   const markAsSeen = async (notificationId) => {
     try {
-      await axios.put(`http://localhost:8000/api/notifications/${notificationId}/markAsSeen`);
+      await axios.put(`http://localhost:8001/api/notifications/${notificationId}/markAsSeen`);
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, isSeen: true } : n

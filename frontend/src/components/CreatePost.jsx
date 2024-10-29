@@ -71,7 +71,7 @@ const CreatePost = () => {
     formData.append('fileFormat', fileFormat);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/posts/createPost', formData, {
+      const response = await axios.post('http://localhost:8001/api/posts/createPost', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       console.log('Post created successfully:', response.data);

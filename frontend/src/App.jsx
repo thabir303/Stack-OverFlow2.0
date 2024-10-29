@@ -9,23 +9,34 @@ import HomePage from './pages/HomePage';
 import PostsList from './components/PostList';
 
 
-function App() {
-  const isAuthenticated = !!localStorage.getItem('token');
+const App = () => {
+  const isAuthenticated = !!localStorage.getItem('token'); // Check if the user is logged in
 
   return (
     <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/signin" element={<LoginPage />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/posts" element={<PostsList />} />
-        {isAuthenticated && <Route path="/create-post" element={<CreatePost />} />}
-      </Routes>
+      <div className="min-h-screen flex flex-col">
+        {isAuthenticated && <Navbar />} 
+        <div className="flex-grow">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/signin" element={<LoginPage />} />
+            {isAuthenticated ? (
+              <>
+                <Route path="/posts" element={<PostsList />} />
+                <Route path="/create-post" element={<CreatePost />} />
+                <Route path="/notifications" element={<Notifications />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="*" element={<Navigate to="/posts" />} />
+              </>
+            ) : (
+              <Route path="*" element={<Navigate to="/signin" />} />
+            )}
+          </Routes>
+        </div>
+      </div>
     </Router>
   );
-}
+};
 
 export default App;

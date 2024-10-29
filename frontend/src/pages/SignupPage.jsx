@@ -20,7 +20,7 @@ const handleSignup = async (e) => {
 
     try {
       // API call to create a new user
-      const response = await axios.post('http://localhost:8000/api/auth/signup', {
+      const response = await axios.post('http://localhost:8001/api/auth/signup', {
         email,
         password,
       });
