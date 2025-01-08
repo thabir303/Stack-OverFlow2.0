@@ -27,7 +27,7 @@ const Navbar = () => {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 1000);
+    const interval = setInterval(fetchNotifications, 86400000);
     return () => clearInterval(interval);
   }, []);
 

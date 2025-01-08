@@ -1,3 +1,4 @@
+//src/App.jsx
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SignupPage from './pages/SignupPage';
@@ -7,7 +8,6 @@ import Profile from './components/Profile';
 import CreatePost from './components/CreatePost';
 import HomePage from './pages/HomePage';
 import PostsList from './components/PostList';
-
 
 const App = () => {
   const isAuthenticated = !!localStorage.getItem('token'); // Check if the user is logged in
