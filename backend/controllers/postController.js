@@ -9,6 +9,7 @@ const path = require("path");
 const mime = require("mime-types");
 const sanitize = require("sanitize-filename");
 const moment = require('moment');
+const axios = require('axios');
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -81,28 +82,17 @@ exports.getPosts = async (req, res) => {
   
       await newPost.save();
   
-      // Create notifications for all users except the post author
-      const users = await User.find({ _id: { $ne: userId } });
-      console.log('Users to notify:', users);
-  
-      if (users.length === 0) {
-        console.log('No users to notify.');
-        return res.status(201).json({
-          success: true,
-          message: 'Post created successfully, but no users to notify.',
-          post: newPost,
-        });
-      }
-  
-      const notifications = users.map((user) => ({
-        recipient: user._id,
-        postId: newPost._id,
-        message: `A new post named: "${newPost.title}"`,
-        isSeen: false,
-      }));
-  
-      const insertedNotifications = await Notification.insertMany(notifications);
-      console.log('Notifications created:', insertedNotifications);
+       // API call to create notifications
+       try {
+        const notificationMessage = `A new post named: "${newPost.title}"`;
+        await axios.post(
+            `http://localhost:8001/api/notifications`,
+            { postId: newPost._id, message: notificationMessage },
+            { headers: { Authorization: `Bearer ${req.headers.authorization.split(' ')[1]}` } }
+        );
+        } catch (error) {
+        console.error('Error sending notification:', error.message);
+        }
   
       res.status(201).json({
         success: true,

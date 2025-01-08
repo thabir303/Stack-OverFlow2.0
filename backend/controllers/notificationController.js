@@ -1,5 +1,6 @@
 // controllers/notification.controller.js
 const Notification = require('../models/Notification');
+const User = require('../models/User');
 
 exports.getUserNotifications = async (req, res) => {
     try {
@@ -41,4 +42,33 @@ exports.markNotificationAsSeen = async (req, res) => {
       res.status(500).json({ message: 'Server error.' });
     }
   };
-  
+
+  exports.createNotification = async (req, res) => {
+    try {
+        const { postId, message } = req.body;
+        const senderId = req.user.id;
+
+        const users = await User.find({ _id: { $ne: senderId } }); 
+        if (!users.length) {
+            return res.status(404).json({ success: false, message: 'No users to notify.' });
+        }
+
+        const notifications = users.map(user => ({
+            recipient: user._id,
+            postId,
+            message,
+            isSeen: false,
+        }));
+
+        const createdNotifications = await Notification.insertMany(notifications);
+
+        res.status(201).json({
+            success: true,
+            message: 'Notifications created successfully.',
+            notifications: createdNotifications,
+        });
+    } catch (error) {
+        console.error('Error creating notifications:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};

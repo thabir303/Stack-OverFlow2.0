@@ -6,5 +6,6 @@ const notificationController = require('../controllers/notificationController');
 
 router.get('/', authMiddleware, notificationController.getUserNotifications);
 router.put('/:notificationId/markAsSeen', authMiddleware, notificationController.markNotificationAsSeen);
+router.post('/', authMiddleware, notificationController.createNotification);
 
 module.exports = router;
