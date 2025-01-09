@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  
+  user-service:
+    build:
+      context: ./user-service
+    container_name: user-service
+    ports:
+      - "8001:8001"
+    environment:
+      - DB=mongodb+srv://bsse1321:Abir123@restapi.nkqy7wr.mongodb.net/StackOverFlowUsers?retryWrites=true&w=majority
+      - JWT_SECRET_KEY=asecretKEY
+    depends_on:
+      - mongo
+
+  
+  post-service:
+    build:
+      context: ./post-service
+    container_name: post-service
+    ports:
+      - "8002:8002"
+    environment:
+      - DB=mongodb+srv://bsse1321:Abir123@restapi.nkqy7wr.mongodb.net/StackOverFlowPosts?retryWrites=true&w=majority
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET_NAME=stackoverflows20
+      - MINIO_USE_SSL=false
+    depends_on:
+      - mongo
+      - minio
+
+  
+  notification-service:
+    build:
+      context: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8003:8003"
+    environment:
+      - DB=mongodb+srv://bsse1321:Abir123@restapi.nkqy7wr.mongodb.net/StackOverFlowNotifications?retryWrites=true&w=majority
+    depends_on:
+      - mongo
+
+  
+  gateway:
+    build:
+      context: ./gateway
+    container_name: gateway
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
+      - post-service
+      - notification-service
+
+  
+  mongo:
+    image: mongo:4.4
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    command: server /data
+    volumes:
+      - minio-data:/data
+
+volumes:
+  mongo-data:
+  minio-data:

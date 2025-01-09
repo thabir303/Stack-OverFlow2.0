@@ -1,33 +1,29 @@
-//models/Post.js
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
     title: {
         type: String,
-        default: 'Unknown',
+        default: 'Untitled',
     },
     content: {
         type: String,
         required: true,
     },
     author_id: {
-        type: mongoose.Schema.Types.ObjectId, ref: 'User',
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
     file_url: {
         type: String,
     },
     file_name: {
-        type: String, 
+        type: String,
     },
     file_type: {
         type: String,
     },
-    code_snippet_url: {
-        type: String,
-    },
-}, {timestamps: true});
+}, { timestamps: true });
 
 const Post = mongoose.model('Post', postSchema);
-
 module.exports = Post;
