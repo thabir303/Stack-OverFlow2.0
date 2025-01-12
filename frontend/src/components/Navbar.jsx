@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { Bell, LogOut } from 'lucide-react';
 
+const baseURL=import.meta.env.VITE_BASE_URL;
+
 const Navbar = () => {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get('http://localhost:8001/api/notifications');
+      const response = await axios.get(`${baseURL}/notifications`);
       const unread = response.data.notifications.filter((n) => !n.isSeen).length;
       setUnreadCount(unread);
     } catch (error) {

@@ -3,6 +3,8 @@ import { User, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import axios from '../api/axios'; 
 
+const baseURL = import.meta.env.VITE_BASE_URL;
+
 const SignupPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +22,7 @@ const handleSignup = async (e) => {
 
     try {
       // API call to create a new user
-      const response = await axios.post('http://localhost:8001/api/auth/signup', {
+      const response = await axios.post(`${baseURL}/auth/signup`, {
         email,
         password,
       });

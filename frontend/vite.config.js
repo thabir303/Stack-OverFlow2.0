@@ -9,4 +9,8 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    host: true, // Set to `true` to listen on all network interfaces
+    port: 5173, // Replace with your desired port number
+  },
 });

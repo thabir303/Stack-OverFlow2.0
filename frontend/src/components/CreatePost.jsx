@@ -10,6 +10,9 @@ import {
   X
 } from 'lucide-react';
 
+const baseURL = import.meta.env.VITE_BASE_URL;
+
+
 const CreatePost = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -71,7 +74,7 @@ const CreatePost = () => {
     formData.append('fileFormat', fileFormat);
 
     try {
-      const response = await axios.post('http://localhost:8001/api/posts/createPost', formData, {
+      const response = await axios.post(`${baseURL}posts/createPost`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       console.log('Post created successfully:', response.data);

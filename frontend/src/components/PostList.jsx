@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { coy } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+const baseURL = import.meta.env.VITE_BASE_URL;
+
 const PostsList = () => {
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
@@ -11,7 +13,7 @@ const PostsList = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get('http://localhost:8001/api/posts/getPost');
+        const response = await axios.get('${baseURL}/posts/getPost');
         setPosts(response.data.posts);
       } catch (error) {
         console.error('Error fetching posts:', error);
