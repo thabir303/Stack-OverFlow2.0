@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from '../api/axios';
 
-const baseURL = import.meta.env.VITE_BASE_URL;
+// const baseURL = import.meta.env.VITE_BASE_URL;
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -10,7 +10,7 @@ const Notifications = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get(`${baseURL}/notifications`, {
+        const response = await axios.get(`http://localhost:8003/api/notifications`, {
             headers: {
               Authorization: `Bearer ${token}`, 
             },

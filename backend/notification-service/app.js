@@ -2,12 +2,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const notificationRoutes = require("./routes/notificationRoutes");
+const cors = require("cors");
 
 dotenv.config();
 const app = express();
 
+app.use(cors());
+
 // Middleware
 app.use(express.json());
+
+// app.use(cors(  { origin: "*" } ));
 
 // Routes
 app.use("/api/notifications", notificationRoutes);

@@ -1,3 +1,4 @@
+//backend/user-service/routes/authRoutes.js
 const express = require('express');
 const { signup, signin } = require('../controllers/authController');
 

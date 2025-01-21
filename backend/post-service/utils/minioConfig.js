@@ -1,4 +1,4 @@
-// config/minioConfig.js
+//backend/post-service/utils/minioConfig.js
 const Minio = require("minio");
 require("dotenv").config();
 

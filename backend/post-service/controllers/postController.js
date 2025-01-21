@@ -1,3 +1,4 @@
+//backend/post-service/controllers/postController.js
 const Post = require("../models/Post");
 const axios = require("axios");
 const minioClient = require("../utils/minioConfig");

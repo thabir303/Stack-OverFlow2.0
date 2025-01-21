@@ -1,10 +1,14 @@
+//backend/user-service/app.js
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
+const cors = require("cors");
 
 dotenv.config();
 const app = express();
+
+app.use(cors());
 
 // Middleware
 app.use(express.json());

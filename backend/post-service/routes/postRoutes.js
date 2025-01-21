@@ -1,3 +1,4 @@
+//backend/post-service/routes/postRoutes.js
 const express = require("express");
 const { getPosts, createPost, getUserPosts } = require("../controllers/postController");
 const uploadMiddleware = require("../utils/uploadMiddleware");

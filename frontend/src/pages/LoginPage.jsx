@@ -3,7 +3,7 @@ import { User, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios'; // Replace with your API instance
 
-const baseURL = import.meta.env.VITE_BASE_URL;
+// const baseURL = import.meta.env.VITE_BASE_URL;
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -19,7 +19,7 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await axios.post(`${baseURL}/auth/signin`, {
+      const response = await axios.post(`http://localhost:8001/api/auth/signin`, {
         email,
         password,
       });
