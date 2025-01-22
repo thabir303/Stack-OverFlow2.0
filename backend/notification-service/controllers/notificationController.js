@@ -1,3 +1,4 @@
+//backend/notification-service/controllers/notificationController.js
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 

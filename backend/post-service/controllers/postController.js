@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const sanitize = require("sanitize-filename");
 const moment = require("moment");
+const jwt = require('jsonwebtoken');
 
 // Fetch all posts or filter by user ID
 exports.getPosts = async (req, res) => {
@@ -34,7 +35,20 @@ exports.getPosts = async (req, res) => {
 exports.createPost = async (req, res) => {
     try {
         const { title, content, codeSnippet } = req.body;
-        const userId = req.user?.id; // Ensure the user ID is attached to the request
+
+        // Extract user ID from Authorization header
+        const token = req.headers.authorization?.split(" ")[1]; // Bearer token
+        if (!token) {
+            return res.status(401).json({ message: 'Authorization token is required' });
+        }
+
+        let userId;
+        try {
+            const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY); // Verify the JWT
+            userId = decodedToken.id; // Assuming the token contains the user ID
+        } catch (error) {
+            return res.status(401).json({ message: 'Invalid or expired token' });
+        }
 
         // Validate request
         if (!content && !req.file && !codeSnippet) {
@@ -67,11 +81,11 @@ exports.createPost = async (req, res) => {
             fileName = originalName;
         }
 
-        // Create a new post object
+        // Create a new post object with the extracted user ID
         const newPost = new Post({
             title: title || "Untitled",
             content: content || "",
-            author_id: userId,
+            author_id: userId, // Attach the user ID
             file_url: fileUrl,
             file_name: fileName,
         });
@@ -81,21 +95,24 @@ exports.createPost = async (req, res) => {
         // Save the post to the database
         await newPost.save();
 
-        // Trigger a notification for other users
         try {
             const notificationMessage = `A new post titled "${newPost.title}" has been created.`;
-            await axios.post(
-                `http://notification-service:8003/api/notifications`,
+            console.log(newPost.title, newPost._id, notificationMessage);
+            console.log('Forwarding Token to Notification Service:', req.headers.authorization);
+            const response = await axios.post(
+                `http://localhost:8003/api/notifications`,
                 { postId: newPost._id, message: notificationMessage },
                 {
                     headers: {
-                        Authorization: req.headers.authorization,
+                        Authorization: req.headers.authorization, // Pass the same token
                     },
                 }
             );
+            console.log('Notification sent:', response.data);
         } catch (error) {
-            console.error("Error sending notification:", error.message);
+            console.error("Error sending notification:", error.response?.data || error.message);
         }
+        
 
         res.status(201).json({
             success: true,

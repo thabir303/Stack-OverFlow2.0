@@ -1,9 +1,8 @@
+// frontend/src/pages/LoginPage.jsx
 import { useState } from 'react';
 import { User, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../api/axios'; // Replace with your API instance
-
-// const baseURL = import.meta.env.VITE_BASE_URL;
+import axios from '../api/axios';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -19,16 +18,15 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await axios.post(`http://localhost:8001/api/auth/signin`, {
-        email,
-        password,
-      });
+      const response = await axios.post(`http://localhost:8001/api/auth/signin`, { email, password });
 
+      // Save token to local storage
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
       console.log('Login successful:', response.data);
 
+      // Redirect to posts page
       navigate('/posts', { replace: true });
     } catch (error) {
       setError(error.response?.data?.message || 'Login failed. Please try again.');
@@ -42,9 +40,7 @@ const LoginPage = () => {
       <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-lg shadow-md">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">Sign in to your account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Enter your credentials to access your account
-          </p>
+          <p className="mt-2 text-sm text-gray-600">Enter your credentials to access your account</p>
         </div>
 
         <form onSubmit={handleLogin} className="mt-8 space-y-6">

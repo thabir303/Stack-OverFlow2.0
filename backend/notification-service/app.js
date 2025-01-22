@@ -1,3 +1,4 @@
+//backedn/notification-service/app.js
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
@@ -11,8 +12,6 @@ app.use(cors());
 
 // Middleware
 app.use(express.json());
-
-// app.use(cors(  { origin: "*" } ));
 
 // Routes
 app.use("/api/notifications", notificationRoutes);

@@ -1,9 +1,8 @@
+// frontend/src/pages/SignupPage.jsx
 import { useState } from 'react';
 import { User, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import axios from '../api/axios'; 
-
-// const baseURL = import.meta.env.VITE_BASE_URL;
 
 const SignupPage = () => {
   const [email, setEmail] = useState('');
@@ -12,32 +11,27 @@ const SignupPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
-
-const handleSignup = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // API call to create a new user
-      const response = await axios.post(`http://localhost:8001/api/auth/signup`, {
-        email,
-        password,
-      });
+      const response = await axios.post(`http://localhost:8001/api/auth/signup`, { email, password });
 
       console.log('Signup successful!', response.data);
       setSuccess(true);
 
-      // Redirect to the sign-in page after successful signup
+      // Redirect to the login page after a successful signup
       setTimeout(() => navigate('/signin'), 1500);
     } catch (error) {
       setError(error.response?.data?.message || 'Signup failed. Please try again.');
     } finally {
       setLoading(false);
     }
-};
+  };
 
 
   return (

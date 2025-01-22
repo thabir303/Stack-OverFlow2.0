@@ -3,19 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { Bell, LogOut } from 'lucide-react';
 
-// const baseURL=import.meta.env.VITE_BASE_URL;
-
 const Navbar = () => {
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(`http://localhost:8003/api/notifications`);
+      const token = localStorage.getItem('token'); // Get token from localStorage
+      console.log('Token:', token); // Debugging log
+      if (!token) {
+        console.error('No token found. Redirecting to login.');
+        navigate('/signin'); // Redirect to login if no token
+        return;
+      }
+
+      const response = await axios.get(`http://localhost:8003/api/notifications`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add Authorization header
+        },
+      });
+
       const unread = response.data.notifications.filter((n) => !n.isSeen).length;
       setUnreadCount(unread);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+
+      // Handle 401 Unauthorized errors
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/signin'); // Redirect to login on unauthorized
+      }
     }
   };
 

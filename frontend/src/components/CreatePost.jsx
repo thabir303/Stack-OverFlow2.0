@@ -1,3 +1,4 @@
+//frontend/src/components/
 import { useState } from 'react';
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
@@ -9,9 +10,6 @@ import {
   Check,
   X
 } from 'lucide-react';
-
-// const baseURL = import.meta.env.VITE_BASE_URL;
-
 
 const CreatePost = () => {
   const [title, setTitle] = useState('');
@@ -66,25 +64,36 @@ const CreatePost = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
+  
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
     formData.append('file', file);
     formData.append('fileFormat', fileFormat);
-
+  
+    const token = localStorage.getItem('token');
+    console.log('Token:', token);
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${token}`,
+    };
+  //Login successful: {token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3O…zk4fQ.3ylM8ohEA2AA95VU7oTBOcaq-2lRZWOYOGu1YHDU4ak'}
     try {
-      const response = await axios.post(`http://localhost:8002/api/posts`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await axios.post(`http://localhost:8002/api/posts`, formData, { headers });
       console.log('Post created successfully:', response.data);
       navigate('/posts');
     } catch (err) {
-      setError(err.response?.data?.message || 'Error creating post. Please try again.');
+      console.error('Error creating post:', err);
+      if (err.response?.status === 401) {
+        navigate('/signin'); // Redirect to login on unauthorized
+      } else {
+        setError(err.response?.data?.message || 'Error creating post. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

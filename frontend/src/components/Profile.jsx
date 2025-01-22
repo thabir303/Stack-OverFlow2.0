@@ -1,3 +1,4 @@
+//frontend/src/components/ProfilePage.jsx
 const Profile = () => {
     let user = {};
   

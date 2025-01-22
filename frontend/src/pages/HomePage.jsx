@@ -1,3 +1,4 @@
+//frontend/src/pages/HomePage.jsx
 import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {

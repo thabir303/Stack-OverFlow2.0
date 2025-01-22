@@ -1,3 +1,4 @@
+//frontend/src/components/PostList.jsx
 import { useEffect, useState } from 'react';
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
@@ -13,13 +14,16 @@ const PostsList = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get('http://localhost:8001/api/posts/getPost');
+        const response = await axios.get(`http://localhost:8002/api/posts`);
         setPosts(response.data.posts);
       } catch (error) {
         console.error('Error fetching posts:', error);
+        if (error.response?.status === 401) {
+          navigate('/signin'); // Redirect to login on unauthorized
+        }
       }
-    };
-
+    };    
+    
     fetchPosts();
   }, []);
 
