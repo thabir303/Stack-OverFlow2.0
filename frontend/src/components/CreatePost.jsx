@@ -64,38 +64,45 @@ const CreatePost = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-  
+
+    if (!title.trim()) {
+        setError("Title is required.");
+        setLoading(false);
+        return;
+    }
+
+    if (!content.trim() && !file) {
+        setError("Please provide either post content or upload a file.");
+        setLoading(false);
+        return;
+    }
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
-    formData.append('file', file);
-    formData.append('fileFormat', fileFormat);
-  
+    if (file) {
+      formData.append('file', file);
+      formData.append('fileFormat', fileFormat);
+    }
+
     const token = localStorage.getItem('token');
-    console.log('Token:', token);
     const headers = {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${token}`,
     };
-    console.log(`Headers ${headers}`);
-    
-  //Login successful: {token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3O…zk4fQ.3ylM8ohEA2AA95VU7oTBOcaq-2lRZWOYOGu1YHDU4ak'}
+
     try {
-      const response = await axios.post(`http://localhost:8002/api/posts`, formData, { headers });
-      console.log('Post created successfully:', response.data);
-      navigate('/posts');
+        const response = await axios.post(`http://localhost:8002/api/posts`, formData, { headers });
+        console.log('Post created successfully:', response.data);
+        navigate('/posts');
     } catch (err) {
-      console.error('Error creating post:', err);
-      if (err.response?.status === 401) {
-        navigate('/signin'); // Redirect to login on unauthorized
-      } else {
+        console.error('Error creating post:', err);
         setError(err.response?.data?.message || 'Error creating post. Please try again.');
-      }
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
-  
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -135,7 +142,6 @@ const CreatePost = () => {
                 rows="5"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 placeholder="Write your post content here..."
-                required
               />
             </div>
 
@@ -235,28 +241,28 @@ const CreatePost = () => {
               </div>
             )}
 
-            {/* Submit Button */}
-            <div className="flex justify-end">
-              <button
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <button
                 type="submit"
-                disabled={loading || !file}
+                disabled={loading}
                 className={`flex items-center px-6 py-2 rounded-md text-white font-medium
                   ${loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}
                   transition-colors disabled:opacity-50`}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
-                    Creating Post...
-                  </>
-                ) : (
-                  <>
-                    <FileText className="mr-2 h-5 w-5" />
-                    Create Post
-                  </>
+                >
+                  {loading ? (
+                    <>
+                        <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                        Creating Post...
+                    </>
+                  ) : (
+                    <>
+                        <FileText className="mr-2 h-5 w-5" />
+                        Create Post
+                    </>
                 )}
-              </button>
-            </div>
+                 </button>
+              </div>
           </form>
         </div>
       </div>

@@ -34,7 +34,7 @@ exports.getPosts = async (req, res) => {
 // Create a new post
 exports.createPost = async (req, res) => {
     try {
-        const { title, content, codeSnippet } = req.body;
+        const { title, content } = req.body;
 
         // Extract user ID from Authorization header
         const token = req.headers.authorization?.split(" ")[1]; // Bearer token
@@ -51,9 +51,14 @@ exports.createPost = async (req, res) => {
         }
 
         // Validate request
-        if (!content && !req.file && !codeSnippet) {
+        // Validate request
+        if (!title || title.trim() === "") {
+            return res.status(400).json({ message: "Title is required." });
+        }
+
+        if (!content && !req.file) {
             return res.status(400).json({
-                message: "Content, file, or code snippet is required to create a post.",
+                message: "Either content or file must be provided to create a post.",
             });
         }
 
@@ -104,7 +109,7 @@ exports.createPost = async (req, res) => {
                 { postId: newPost._id, message: notificationMessage },
                 {
                     headers: {
-                        "x-api-key": "Abir",
+                        "x-api-key": process.env.NOTIFICATION_SERVICE_API_KEY,
                         Authorization: req.headers.authorization, 
                         "Content-Type": "application/json",
                     },

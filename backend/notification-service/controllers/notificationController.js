@@ -19,8 +19,8 @@ exports.getUserNotifications = async (req, res) => {
                         `http://localhost:8002/api/posts/${notification.postId}`,
                         {
                             headers: {
-                                Authorization: req.headers.authorization, // Forward JWT token
-                                "x-api-key": process.env.POST_SERVICE_API_KEY, // Pass API key
+                                Authorization: req.headers.authorization,
+                                "x-api-key": process.env.POST_SERVICE_API_KEY, 
                             },
                         }
                     );
