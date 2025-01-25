@@ -9,17 +9,15 @@ const Navbar = () => {
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token'); // Get token from localStorage
-      console.log('Token:', token); // Debugging log
+      const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No token found. Redirecting to login.');
-        navigate('/signin'); // Redirect to login if no token
+        navigate('/signin');
         return;
       }
 
       const response = await axios.get(`http://localhost:8003/api/notifications`, {
         headers: {
-          Authorization: `Bearer ${token}`, // Add Authorization header
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -28,38 +26,36 @@ const Navbar = () => {
     } catch (error) {
       console.error('Error fetching notifications:', error);
 
-      // Handle 401 Unauthorized errors
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        navigate('/signin'); // Redirect to login on unauthorized
+        navigate('/signin');
       }
     }
   };
 
-  const handleNotificationClick = async () => {
-    try {
-      navigate('/notifications');
-    } catch (error) {
-      console.error('Error navigating to notifications:', error);
-    }
+  const handleNotificationClick = () => {
+    navigate('/notifications');
   };
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 86400000);
-    return () => clearInterval(interval);
+
+    // Expose updateUnreadCount globally so it can be called from other components
+    window.updateUnreadCount = fetchNotifications;
+
+    return () => {
+      delete window.updateUnreadCount;
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
     navigate('/signin');
   };
 
   return (
     <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/')}>
+      <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/posts')}>
         StackOverflow
       </h1>
       <div className="flex items-center space-x-6">

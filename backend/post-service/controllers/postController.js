@@ -104,7 +104,9 @@ exports.createPost = async (req, res) => {
                 { postId: newPost._id, message: notificationMessage },
                 {
                     headers: {
-                        Authorization: req.headers.authorization, // Pass the same token
+                        "x-api-key": "Abir",
+                        Authorization: req.headers.authorization, 
+                        "Content-Type": "application/json",
                     },
                 }
             );
@@ -124,6 +126,25 @@ exports.createPost = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+
+exports.getPostById = async (req, res) => {
+    try {
+        const { postId } = req.params;
+
+        // Find the post by its ID
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found." });
+        }
+
+        res.status(200).json({ success: true, post });
+    } catch (error) {
+        console.error("Error fetching post by ID:", error.message);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+
 
 // Fetch posts by a specific user
 exports.getUserPosts = async (req, res) => {

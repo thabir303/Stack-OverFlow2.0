@@ -1,23 +1,22 @@
-//frontend/src/components/Notifications.jsx
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
-
-// const baseURL = import.meta.env.VITE_BASE_URL;
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
-  const token = localStorage.getItem('token'); 
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const response = await axios.get(`http://localhost:8003/api/notifications`, {
-            headers: {
-              Authorization: `Bearer ${token}`, 
-            },
-          });
-          console.log('Fetched notifications:', response.data.notifications);
-          setNotifications(response.data.notifications);
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log('Fetched notifications:', response.data.notifications);
+        setNotifications(response.data.notifications);
       } catch (error) {
         console.error('Error fetching notifications:', error);
       }
@@ -28,15 +27,35 @@ const Notifications = () => {
 
   const markAsSeen = async (notificationId) => {
     try {
-      await axios.put(`${baseURL}/notifications/${notificationId}/markAsSeen`);
+      await axios.put(`http://localhost:8003/api/notifications/${notificationId}/markAsSeen`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Temporarily mark as seen and schedule removal
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === notificationId ? { ...n, isSeen: true } : n
         )
       );
+
+      // Remove notification after 4-5 seconds
+      setTimeout(() => {
+        setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
+      }, 5000);
+
+      // Update unread count in the navbar (optional)
+      if (window.updateUnreadCount) {
+        window.updateUnreadCount();
+      }
     } catch (error) {
       console.error('Error marking notification as seen:', error);
     }
+  };
+
+  const viewPost = (postId) => {
+    navigate(`/posts/${postId}`);
   };
 
   return (
@@ -53,14 +72,22 @@ const Notifications = () => {
             }`}
           >
             <p>{notification.message}</p>
-            {!notification.isSeen && (
+            <div className="flex space-x-4 mt-2">
+              {!notification.isSeen && (
+                <button
+                  onClick={() => markAsSeen(notification._id)}
+                  className="text-blue-500"
+                >
+                  Mark as Seen
+                </button>
+              )}
               <button
-                onClick={() => markAsSeen(notification._id)}
-                className="text-blue-500"
+                onClick={() => viewPost(notification.postId)}
+                className="text-green-500"
               >
-                Mark as Seen
+                View Post
               </button>
-            )}
+            </div>
           </div>
         ))
       )}

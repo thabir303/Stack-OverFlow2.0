@@ -77,6 +77,8 @@ const CreatePost = () => {
       'Content-Type': 'multipart/form-data',
       'Authorization': `Bearer ${token}`,
     };
+    console.log(`Headers ${headers}`);
+    
   //Login successful: {token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3O…zk4fQ.3ylM8ohEA2AA95VU7oTBOcaq-2lRZWOYOGu1YHDU4ak'}
     try {
       const response = await axios.post(`http://localhost:8002/api/posts`, formData, { headers });

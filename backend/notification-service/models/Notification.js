@@ -10,7 +10,7 @@ const notificationSchema = new mongoose.Schema(
         },
         postId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Post",
+            // ref: "Post",
             required: true,
         },
         message: {

@@ -1,26 +1,44 @@
 //backend/notification-service/controllers/notificationController.js
 const Notification = require('../models/Notification');
-const User = require('../models/User');
+// const User = require('../models/User');
+const axios = require('axios');
 
 // Get notifications for a specific user
 exports.getUserNotifications = async (req, res) => {
     try {
-        const userId = req.user.id; // Extract the user ID from the request (e.g., via middleware)
-        console.log('Fetching notifications for user:', userId);
+        const userId = req.user.id; // Extract the user ID from the token
 
-        // Fetch notifications, populate postId for more details, and sort by creation time (most recent first)
-        const notifications = await Notification.find({ recipient: userId })
-            .populate('postId')
-            .sort({ createdAt: -1 });
+        // Fetch notifications for the user
+        const notifications = await Notification.find({ recipient: userId }).sort({ createdAt: -1 });
 
-        console.log('Notifications fetched:', notifications);
+        // Fetch post details from post-service for each notification
+        const notificationsWithPosts = await Promise.all(
+            notifications.map(async (notification) => {
+                try {
+                    const postResponse = await axios.get(
+                        `http://localhost:8002/api/posts/${notification.postId}`,
+                        {
+                            headers: {
+                                Authorization: req.headers.authorization, // Forward JWT token
+                                "x-api-key": process.env.POST_SERVICE_API_KEY, // Pass API key
+                            },
+                        }
+                    );
+                    return { ...notification._doc, post: postResponse.data }; // Combine notification and post details
+                } catch (error) {
+                    console.error(`Error fetching post ${notification.postId}:`, error.message);
+                    return { ...notification._doc, post: null }; // Add `post: null` if post fetch fails
+                }
+            })
+        );
 
-        res.status(200).json({ success: true, notifications });
+        res.status(200).json({ success: true, notifications: notificationsWithPosts });
     } catch (error) {
-        console.error('Error fetching notifications:', error);
-        res.status(500).json({ message: 'Server error.' });
+        console.error("Error fetching notifications:", error.message);
+        res.status(500).json({ message: "Server error." });
     }
 };
+
 
 // Mark a specific notification as seen
 exports.markNotificationAsSeen = async (req, res) => {
@@ -49,16 +67,32 @@ exports.markNotificationAsSeen = async (req, res) => {
 // Create notifications for multiple users
 exports.createNotification = async (req, res) => {
     try {
-        const { postId, message } = req.body; // Extract postId and message from the request body
-        const senderId = req.user.id; // Get the sender ID (current user)
+        const { postId, message } = req.body;
 
-        // Find all users except the sender
-        const users = await User.find({ _id: { $ne: senderId } }); 
-        if (!users.length) {
-            return res.status(404).json({ success: false, message: 'No users to notify.' });
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized: Missing user information.' });
         }
 
-        // Map users to create notification objects
+        const senderId = req.user.id; // Extract the sender ID from `req.user`
+        console.log( `Creating notifications for post ${postId} with message: ${message} ${senderId}`);
+        
+        // Find all users except the sender
+        const response = await axios.get("http://localhost:8001/api/auth", {
+            headers: {
+                "x-api-key": process.env.USER_SERVICE_API_KEY, // Pass API key for authentication
+                Authorization: req.headers.authorization, 
+            },
+        });
+
+        console.log(`response.data : `, response.data);
+        
+
+        const users = response.data.users.filter(user => user._id !== senderId);
+        if (!users.length) {
+            return res.status(404).json({ success: false, message: "No users to notify." });
+        }
+
+        // Create notifications for users
         const notifications = users.map(user => ({
             recipient: user._id,
             postId,
@@ -66,7 +100,6 @@ exports.createNotification = async (req, res) => {
             isSeen: false,
         }));
 
-        // Insert notifications into the database
         const createdNotifications = await Notification.insertMany(notifications);
 
         res.status(201).json({
@@ -74,8 +107,10 @@ exports.createNotification = async (req, res) => {
             message: 'Notifications created successfully.',
             notifications: createdNotifications,
         });
+        console.log('Created notifications:', createdNotifications);
     } catch (error) {
-        console.error('Error creating notifications:', error);
+        console.error('Error creating notifications:', error.message);
         res.status(500).json({ message: 'Server error.' });
     }
 };
+

@@ -1,19 +1,33 @@
+//user-service/utils/authMiddleware.js
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1]; // Get the token from the Authorization header
-    if (!token) {
+    const apiKey = req.headers["x-api-key"];
+
+    // Handle API Key authentication
+    if (apiKey && apiKey === process.env.USER_SERVICE_API_KEY) {
+        // return next(); // Proceed if API Key is valid
+    }
+
+    // Handle JWT authentication
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
         return res.status(401).json({ message: "Unauthorized: No token provided." });
     }
 
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+        return res.status(401).json({ message: "Unauthorized: Invalid token." });
+    }
+
     try {
-        // Verify the token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); // Verify token
         req.user = decoded; // Attach user info to the request
-        next();
+        next(); // Proceed to the next middleware/controller
     } catch (error) {
         return res.status(401).json({ message: "Unauthorized: Invalid token." });
     }
 };
 
 module.exports = authMiddleware;
+
