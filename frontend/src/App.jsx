@@ -12,7 +12,10 @@ const AppContent = () => {
   const location = useLocation();
 
   // Exclude Navbar only for the root path (login page)
-  const shouldShowNavbar = location.pathname !== '/';
+  // const shouldShowNavbar = location.pathname !== '/';
+  const hideNavbarRoutes = ['/signin', '/signup'];
+  const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
+
 
   return (
     <div className="min-h-screen flex flex-col">
