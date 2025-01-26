@@ -13,7 +13,7 @@ const AppContent = () => {
 
   // Exclude Navbar only for the root path (login page)
   // const shouldShowNavbar = location.pathname !== '/';
-  const hideNavbarRoutes = ['/signin', '/signup'];
+  const hideNavbarRoutes = ['/','/signin', '/signup'];
   const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
 
 
@@ -22,7 +22,7 @@ const AppContent = () => {
       {shouldShowNavbar && <Navbar />} {/* Render Navbar unless on root page */}
       <div className="flex-grow">
         <Routes>
-          <Route path="/" element={<LoginPage />} /> {/* Root/Login Page */}
+          <Route path="/" element={<LoginPage />} /> 
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/signin" element={<LoginPage />} />
           <Route path="/posts" element={<PostsList />} />
