@@ -18,7 +18,7 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await axios.post(`http://localhost:8001/api/auth/signin`, { email, password });
+      const response = await axios.post(`http://localhost/api/auth/signin`, { email, password });
 
       // Save token to local storage
       localStorage.setItem('token', response.data.token);

@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 8002
 
-CMD ["node", "app.js"]
+CMD ["npm", "run", "dev"]

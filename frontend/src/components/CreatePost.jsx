@@ -92,7 +92,7 @@ const CreatePost = () => {
     };
 
     try {
-        const response = await axios.post(`http://localhost:8002/api/posts`, formData, { headers });
+        const response = await axios.post(`http://localhost/api/posts`, formData, { headers });
         console.log('Post created successfully:', response.data);
         navigate('/posts');
     } catch (err) {

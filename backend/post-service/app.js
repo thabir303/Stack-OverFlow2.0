@@ -10,7 +10,13 @@ dotenv.config();
 // Create an Express application
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+    origin: ['http://localhost:5173', 'http://localhost:8003', 'http://localhost:8002', 'http://localhost:8001', 'http://localhost:8000',],
+    // origin: true,
+    credentials: true,
+  };
+app.use(cors(corsOptions));
+
 
 // Middleware to parse JSON requests
 app.use(express.json());

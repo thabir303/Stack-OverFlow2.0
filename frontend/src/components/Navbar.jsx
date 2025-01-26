@@ -15,7 +15,7 @@ const Navbar = () => {
         return;
       }
 
-      const response = await axios.get(`http://localhost:8003/api/notifications`, {
+      const response = await axios.get(`http://localhost/api/notifications`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

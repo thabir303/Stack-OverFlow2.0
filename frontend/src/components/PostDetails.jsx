@@ -11,7 +11,7 @@ const PostDetails = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(`http://localhost:8002/api/posts/${postId}`);
+        const response = await axios.get(`http://localhost/api/posts/${postId}`);
         setPost(response.data.post);
       } catch (err) {
         setError(err.response?.data?.message || "Error fetching post.");

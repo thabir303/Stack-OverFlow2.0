@@ -10,25 +10,39 @@ const minioClient = new Minio.Client({
   secretKey: process.env.MINIO_SECRET_KEY,
 });
 
-minioClient.bucketExists(process.env.MINIO_BUCKET_NAME, (err) => {
-  if (err) {
-    if (err.code === "NoSuchBucket") {
-      minioClient.makeBucket(
-        process.env.MINIO_BUCKET_NAME,
-        "us-east-1",
-        (err) => {
-          if (err) return console.error("Error creating bucket.", err);
-          console.log(
-            `Bucket "${process.env.MINIO_BUCKET_NAME}" created successfully.`
-          );
-        }
-      );
+const bucketName = process.env.MINIO_BUCKET_NAME;
+
+// Check if bucket exists, create if not, and make it public
+(async () => {
+  try {
+    const bucketExists = await minioClient.bucketExists(bucketName);
+    console.log(`Checking if bucket "${bucketExists}" exists...`);
+    if (bucketExists) {
+      console.log(`Bucket "${bucketName}" already exists.`);
     } else {
-      console.error("Error checking bucket:", err);
+      // Create bucket
+      await minioClient.makeBucket(bucketName, "us-east-1");
+      console.log(`Bucket "${bucketName}" created successfully.`);
+
+      // Set bucket policy to public
+      const bucketPolicy = {
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Effect: "Allow",
+            Principal: "*",
+            Action: ["s3:GetObject"],
+            Resource: [`arn:aws:s3:::${bucketName}/*`],
+          },
+        ],
+      };
+
+      await minioClient.setBucketPolicy(bucketName, JSON.stringify(bucketPolicy));
+      console.log(`Bucket "${bucketName}" is now public.`);
     }
-  } else {
-    console.log(`Bucket "${process.env.MINIO_BUCKET_NAME}" exists.`);
+  } catch (err) {
+    console.error("Error setting up MinIO bucket:", err.message);
   }
-});
+})();
 
 module.exports = minioClient;

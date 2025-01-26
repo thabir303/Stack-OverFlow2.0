@@ -16,7 +16,7 @@ exports.getUserNotifications = async (req, res) => {
             notifications.map(async (notification) => {
                 try {
                     const postResponse = await axios.get(
-                        `http://localhost:8002/api/posts/${notification.postId}`,
+                        `http://post-service:8002/api/posts/${notification.postId}`,
                         {
                             headers: {
                                 Authorization: req.headers.authorization,
@@ -68,17 +68,17 @@ exports.createNotification = async (req, res) => {
     try {
         const { postId, message } = req.body;
 
-        if (!req.user) {
-            return res.status(401).json({ message: "Unauthorized: Missing user information." });
-        }
+        // if (!req.user) {
+        //     return res.status(401).json({ message: "Unauthorized: Missing user information." });
+        // }
 
-        const senderId = req.user.id; // Extract sender ID from the token
-        const senderEmail = req.user.email; // Extract sender email from the token
+        const senderId = req.body.userId; // Extract sender ID from the token
+        const senderEmail = req.body.senderEmail; // Extract sender email from the token
 
         console.log(`Decoded token for notifications:`, req.user);
 
         // Find all users except the sender
-        const response = await axios.get("http://localhost:8001/api/auth", {
+        const response = await axios.get("http://user-service:8001/api/auth", {
             headers: {
                 "x-api-key": process.env.USER_SERVICE_API_KEY,
                 Authorization: req.headers.authorization,

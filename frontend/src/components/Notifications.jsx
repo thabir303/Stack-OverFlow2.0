@@ -11,7 +11,7 @@ const Notifications = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get(`http://localhost:8003/api/notifications`, {
+        const response = await axios.get(`http://localhost/api/notifications`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -30,7 +30,7 @@ const Notifications = () => {
   const markAsSeen = async (notificationId) => {
     try {
       await axios.put(
-        `http://localhost:8003/api/notifications/${notificationId}/markAsSeen`,
+        `http://localhost/api/notifications/${notificationId}/markAsSeen`,
         {},
         {
           headers: {

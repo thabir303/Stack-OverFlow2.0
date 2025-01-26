@@ -1,54 +1,40 @@
-# version: '3.8'
+version: '3.8'
 
 services:
-  
   user-service:
     build:
       context: ./backend/user-service
-    # container_name: user-service
     ports:
       - "8001:8001"
-    # environment:
-    #   - DB=mongodb+srv://bsse1321:Abir123@restapi.nkqy7wr.mongodb.net/StackOverFlowUsers?retryWrites=true&w=majority
-    #   - JWT_SECRET_KEY=asecretKEY
-    # depends_on:
-    #   - mongo
+    env_file:
+      - ./backend/user-service/.env
+    depends_on:
+      - mongo_users
 
-  
   post-service:
     build:
       context: ./backend/post-service
-    # container_name: post-service
     ports:
       - "8002:8002"
-    # environment:
-    #   - DB=mongodb+srv://bsse1321:Abir123@restapi.nkqy7wr.mongodb.net/StackOverFlowPosts?retryWrites=true&w=majority
-    #   - MINIO_ENDPOINT=minio
-    #   - MINIO_PORT=9000
-    #   - MINIO_ACCESS_KEY=minioadmin
-    #   - MINIO_SECRET_KEY=minioadmin
-    #   - MINIO_BUCKET_NAME=stackoverflows20
-    #   - MINIO_USE_SSL=false
-    # depends_on:
-    #   - mongo
-    #   - minio
+    env_file:
+      - ./backend/post-service/.env
+    depends_on:
+      - mongo_posts
+      - minio
 
-  
   notification-service:
     build:
       context: ./backend/notification-service
-    # container_name: notification-service
     ports:
       - "8003:8003"
-    # environment:
-    #   - DB=mongodb+srv://bsse1321:Abir123@restapi.nkqy7wr.mongodb.net/StackOverFlowNotifications?retryWrites=true&w=majority
-    # depends_on:
-    #   - mongo
-  
+    env_file:
+      - ./backend/notification-service/.env
+    depends_on:
+      - mongo_notifications
+
   gateway:
     build:
       context: ./backend/gateway
-    # container_name: gateway
     ports:
       - "80:80"
     depends_on:
@@ -58,59 +44,49 @@ services:
 
   mongo_users:
     image: mongo:4.4
-    # container_name: mongo_users
     ports:
       - "27018:27017"
     volumes:
-      - mongo-data_users:/data/db
+      - mongo-data-users:/data/db
 
   mongo_posts:
     image: mongo:4.4
-    # container_name: mongo_posts
     ports:
       - "27019:27017"
     volumes:
-      - mongo-data_posts:/data/db
+      - mongo-data-posts:/data/db
 
   mongo_notifications:
     image: mongo:4.4
-    # container_name: mongo_notifications
     ports:
       - "27020:27017"
     volumes:
-      - mongo-data_notifications:/data/db
-
-  # mongo:
-  #   image: mongo:4.4
-  #   container_name: mongo
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo-data:/data/db
+      - mongo-data-notifications:/data/db
 
   minio:
-    image: minio/minio
-    # container_name: minio
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
-    # environment:
-    #   MINIO_ACCESS_KEY: minioadmin
-    #   MINIO_SECRET_KEY: minioadmin
-    command: server /data
+      - "9001:9001" 
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
     volumes:
       - minio-data:/data
 
-  frontend:
-    build:
-      context: ./frontend
-    # container_name: frontend
-    ports:
-      - "5173:5173"
-    # depends_on:
-    #   - gateway
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   command: server /data --console-address ":5173"
+  #   ports:
+  #     - "5173:5173"
+  #   depends_on:
+  #     - gateway
 
 volumes:
+  mongo-data-users:
+  mongo-data-posts:
+  mongo-data-notifications:
   minio-data:
-  mongo-data_users:
-  mongo-data_posts:
-  mongo-data_notifications:

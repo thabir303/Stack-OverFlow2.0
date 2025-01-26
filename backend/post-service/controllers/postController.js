@@ -103,12 +103,15 @@ exports.createPost = async (req, res) => {
             const notificationPayload = {
                 postId: newPost._id,
                 message: `A new post titled "${newPost.title}" has been created.`,
+                senderEmail,
+                userId,
+
             };
         
             console.log("Notification Payload:", notificationPayload);
         
             const response = await axios.post(
-                "http://localhost:8003/api/notifications",
+                "http://notification-service:8003/api/notifications",
                 notificationPayload,
                 {
                     headers: {

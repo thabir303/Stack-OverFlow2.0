@@ -19,7 +19,7 @@ const SignupPage = () => {
     setError('');
 
     try {
-      const response = await axios.post(`http://localhost:8001/api/auth/signup`, { email, password });
+      const response = await axios.post(`http://localhost/api/auth/signup`, { email, password });
 
       console.log('Signup successful!', response.data);
       setSuccess(true);
