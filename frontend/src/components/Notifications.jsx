@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from '../api/axios';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
+import { CheckCircle, Eye, BellOff } from "lucide-react";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,10 +16,11 @@ const Notifications = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log('Fetched notifications:', response.data.notifications);
-        setNotifications(response.data.notifications);
+        console.log("Fetched notifications:", response.data.notifications);
+        // Filter out already seen notifications here
+        setNotifications(response.data.notifications.filter((n) => !n.isSeen));
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.error("Error fetching notifications:", error);
       }
     };
 
@@ -27,30 +29,25 @@ const Notifications = () => {
 
   const markAsSeen = async (notificationId) => {
     try {
-      await axios.put(`http://localhost:8003/api/notifications/${notificationId}/markAsSeen`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Temporarily mark as seen and schedule removal
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n._id === notificationId ? { ...n, isSeen: true } : n
-        )
+      await axios.put(
+        `http://localhost:8003/api/notifications/${notificationId}/markAsSeen`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
-      // Remove notification after 4-5 seconds
-      setTimeout(() => {
-        setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
-      }, 5000);
+      // Remove the notification immediately after marking as seen
+      setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
 
       // Update unread count in the navbar (optional)
       if (window.updateUnreadCount) {
         window.updateUnreadCount();
       }
     } catch (error) {
-      console.error('Error marking notification as seen:', error);
+      console.error("Error marking notification as seen:", error);
     }
   };
 
@@ -59,37 +56,53 @@ const Notifications = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10">
-      <h2 className="text-2xl font-bold mb-5">Notifications</h2>
+    <div className="max-w-3xl mx-auto mt-10">
+      <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">
+        Notifications
+      </h2>
       {notifications.length === 0 ? (
-        <p>No notifications found.</p>
+        <div className="flex flex-col items-center text-gray-500 mt-20">
+          <BellOff className="w-16 h-16 mb-4" />
+          <p className="text-lg">No new notifications.</p>
+        </div>
       ) : (
-        notifications.map((notification) => (
-          <div
-            key={notification._id}
-            className={`p-4 mb-4 border rounded ${
-              notification.isSeen ? 'bg-gray-200' : 'bg-yellow-100'
-            }`}
-          >
-            <p>{notification.message}</p>
-            <div className="flex space-x-4 mt-2">
-              {!notification.isSeen && (
+        <div className="space-y-4">
+          {notifications.map((notification) => (
+            <div
+              key={notification._id}
+              className={`p-6 rounded-lg shadow-sm transition-all border bg-yellow-50 border-yellow-300 hover:shadow-md hover:scale-105`}
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-lg font-medium text-gray-800">
+                    {notification.message}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Posted by: {notification.senderEmail || "Unknown"}
+                  </p>
+                </div>
+                <CheckCircle
+                  className="w-6 h-6 text-gray-400 hover:text-green-500 cursor-pointer"
+                  onClick={() => markAsSeen(notification._id)}
+                />
+              </div>
+              <div className="flex justify-end mt-4 space-x-4">
                 <button
                   onClick={() => markAsSeen(notification._id)}
-                  className="text-blue-500"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600"
                 >
                   Mark as Seen
                 </button>
-              )}
-              <button
-                onClick={() => viewPost(notification.postId)}
-                className="text-green-500"
-              >
-                View Post
-              </button>
+                <button
+                  onClick={() => viewPost(notification.postId)}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600"
+                >
+                  View Post
+                </button>
+              </div>
             </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );

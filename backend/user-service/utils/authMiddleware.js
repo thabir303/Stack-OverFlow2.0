@@ -6,7 +6,7 @@ const authMiddleware = (req, res, next) => {
 
     // Handle API Key authentication
     if (apiKey && apiKey === process.env.USER_SERVICE_API_KEY) {
-        // return next(); // Proceed if API Key is valid
+        return next(); // Proceed if API Key is valid
     }
 
     // Handle JWT authentication
@@ -25,9 +25,9 @@ const authMiddleware = (req, res, next) => {
         req.user = decoded; // Attach user info to the request
         next(); // Proceed to the next middleware/controller
     } catch (error) {
+        console.error("JWT verification failed:", error.message);
         return res.status(401).json({ message: "Unauthorized: Invalid token." });
     }
 };
 
 module.exports = authMiddleware;
-

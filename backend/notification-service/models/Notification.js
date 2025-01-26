@@ -10,12 +10,15 @@ const notificationSchema = new mongoose.Schema(
         },
         postId: {
             type: mongoose.Schema.Types.ObjectId,
-            // ref: "Post",
             required: true,
         },
         message: {
             type: String,
             required: true,
+        },
+        senderEmail: {
+            type: String,
+            required: true, 
         },
         isSeen: {
             type: Boolean,

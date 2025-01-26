@@ -15,6 +15,10 @@ const postSchema = new mongoose.Schema({
         ref: 'User',
         // required: true,
     },
+    author_email: {
+        type: String, // Include senderEmail in the Post model
+        required: true,
+    },
     file_url: {
         type: String,
     },

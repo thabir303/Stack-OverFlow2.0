@@ -39,7 +39,6 @@ exports.getUserNotifications = async (req, res) => {
     }
 };
 
-
 // Mark a specific notification as seen
 exports.markNotificationAsSeen = async (req, res) => {
     try {
@@ -70,33 +69,33 @@ exports.createNotification = async (req, res) => {
         const { postId, message } = req.body;
 
         if (!req.user) {
-            return res.status(401).json({ message: 'Unauthorized: Missing user information.' });
+            return res.status(401).json({ message: "Unauthorized: Missing user information." });
         }
 
-        const senderId = req.user.id; // Extract the sender ID from `req.user`
-        console.log( `Creating notifications for post ${postId} with message: ${message} ${senderId}`);
-        
+        const senderId = req.user.id; // Extract sender ID from the token
+        const senderEmail = req.user.email; // Extract sender email from the token
+
+        console.log(`Decoded token for notifications:`, req.user);
+
         // Find all users except the sender
         const response = await axios.get("http://localhost:8001/api/auth", {
             headers: {
-                "x-api-key": process.env.USER_SERVICE_API_KEY, // Pass API key for authentication
-                Authorization: req.headers.authorization, 
+                "x-api-key": process.env.USER_SERVICE_API_KEY,
+                Authorization: req.headers.authorization,
             },
         });
 
-        console.log(`response.data : `, response.data);
-        
-
-        const users = response.data.users.filter(user => user._id !== senderId);
+        const users = response.data.users.filter((user) => user._id !== senderId);
         if (!users.length) {
             return res.status(404).json({ success: false, message: "No users to notify." });
         }
 
-        // Create notifications for users
-        const notifications = users.map(user => ({
+        // Create notifications for each user
+        const notifications = users.map((user) => ({
             recipient: user._id,
+            senderEmail,
             postId,
-            message,
+            message: `${message}`, // Include sender email
             isSeen: false,
         }));
 
@@ -104,13 +103,13 @@ exports.createNotification = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'Notifications created successfully.',
+            message: "Notifications created successfully.",
             notifications: createdNotifications,
         });
-        console.log('Created notifications:', createdNotifications);
+
+        console.log("Notifications created:", createdNotifications);
     } catch (error) {
-        console.error('Error creating notifications:', error.message);
-        res.status(500).json({ message: 'Server error.' });
+        console.error("Error creating notifications:", error.message);
+        res.status(500).json({ message: "Server error." });
     }
 };
-

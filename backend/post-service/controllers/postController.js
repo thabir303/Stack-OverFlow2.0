@@ -36,22 +36,23 @@ exports.createPost = async (req, res) => {
     try {
         const { title, content } = req.body;
 
-        // Extract user ID from Authorization header
+        // Extract user ID and token from Authorization header
         const token = req.headers.authorization?.split(" ")[1]; // Bearer token
         if (!token) {
-            return res.status(401).json({ message: 'Authorization token is required' });
+            return res.status(401).json({ message: "Authorization token is required." });
         }
 
         let userId;
+        let senderEmail = "Unknown";
         try {
-            const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY); // Verify the JWT
-            userId = decodedToken.id; // Assuming the token contains the user ID
+            const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY); // Verify JWT
+            userId = decodedToken.id;
+            senderEmail = decodedToken.email; // Assuming `email` is part of the JWT payload
+            console.log("Decoded token:", decodedToken);
         } catch (error) {
-            return res.status(401).json({ message: 'Invalid or expired token' });
+            return res.status(401).json({ message: "Invalid or expired token." });
         }
 
-        // Validate request
-        // Validate request
         if (!title || title.trim() === "") {
             return res.status(400).json({ message: "Title is required." });
         }
@@ -65,7 +66,7 @@ exports.createPost = async (req, res) => {
         let fileUrl = null;
         let fileName = null;
 
-        // If a file is uploaded, handle it
+        // Handle file upload
         if (req.file) {
             const originalName = sanitize(req.file.originalname);
             const fileExtension = path.extname(originalName);
@@ -73,7 +74,6 @@ exports.createPost = async (req, res) => {
 
             const metaData = { "Content-Type": req.file.mimetype };
 
-            // Upload file to MinIO
             await minioClient.putObject(
                 process.env.MINIO_BUCKET_NAME,
                 uniqueFileName,
@@ -86,41 +86,44 @@ exports.createPost = async (req, res) => {
             fileName = originalName;
         }
 
-        // Create a new post object with the extracted user ID
+        // Create a new post object with the senderEmail included
         const newPost = new Post({
             title: title || "Untitled",
             content: content || "",
-            author_id: userId, // Attach the user ID
+            author_id: userId,
+            author_email: senderEmail, // Include sender email here
             file_url: fileUrl,
             file_name: fileName,
         });
 
-        console.log("New Post:", newPost);
-
-        // Save the post to the database
         await newPost.save();
 
+        // Send notification
         try {
-            const notificationMessage = `A new post titled "${newPost.title}" has been created.`;
-            console.log(newPost.title, newPost._id, notificationMessage);
-            console.log('Forwarding Token to Notification Service:', req.headers.authorization);
+            const notificationPayload = {
+                postId: newPost._id,
+                message: `A new post titled "${newPost.title}" has been created.`,
+            };
+        
+            console.log("Notification Payload:", notificationPayload);
+        
             const response = await axios.post(
-                `http://localhost:8003/api/notifications`,
-                { postId: newPost._id, message: notificationMessage },
+                "http://localhost:8003/api/notifications",
+                notificationPayload,
                 {
                     headers: {
                         "x-api-key": process.env.NOTIFICATION_SERVICE_API_KEY,
-                        Authorization: req.headers.authorization, 
+                        Authorization: req.headers.authorization, // Forward user token
                         "Content-Type": "application/json",
-                    },
+                    }
                 }
             );
-            console.log('Notification sent:', response.data);
+        
+            console.log("Notification sent:", response.data);
         } catch (error) {
             console.error("Error sending notification:", error.response?.data || error.message);
         }
         
-
         res.status(201).json({
             success: true,
             message: "Post created successfully.",
@@ -131,6 +134,7 @@ exports.createPost = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+
 
 exports.getPostById = async (req, res) => {
     try {

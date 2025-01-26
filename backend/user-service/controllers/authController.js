@@ -18,11 +18,20 @@ exports.signup = async (req, res) => {
         const newUser = new User({ email, password: hashedPassword });
         await newUser.save();
 
-        res.status(201).json({ message: 'User registered successfully.' });
+        // Generate JWT with email included
+        const token = jwt.sign(
+            { id: newUser._id, email: newUser.email }, // Add email to payload
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({ message: 'User registered successfully.', token });
     } catch (error) {
+        console.error("Error during signup:", error.message);
         res.status(500).json({ message: 'Server error.' });
     }
 };
+
 
 exports.signin = async (req, res) => {
     try {
@@ -40,14 +49,20 @@ exports.signin = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
 
-        // Generate JWT
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '7d' });
+        // Generate JWT with email included
+        const token = jwt.sign(
+            { id: user._id, email: user.email }, // Add email to payload
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: '7d' }
+        );
 
         res.status(200).json({ token });
     } catch (error) {
+        console.error("Error during signin:", error.message);
         res.status(500).json({ message: 'Server error.' });
     }
 };
+
 
 
 exports.getAllUsers = async (req, res) => {
