@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const notificationRoutes = require("./routes/notificationRoutes");
 const cors = require("cors");
+const notificationCleaner = require("./controllers/notificationCleaner"); // Import the notification cleaner
 
 dotenv.config();
 const app = express();
@@ -32,3 +33,5 @@ const PORT = process.env.PORT || 8003;
 app.listen(PORT, () =>
     console.log(`Notification Service running on port ${PORT}`)
 );
+
+notificationCleaner();
