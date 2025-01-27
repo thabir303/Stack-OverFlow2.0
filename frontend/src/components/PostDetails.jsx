@@ -7,6 +7,7 @@ const PostDetails = () => {
   const [post, setPost] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showFilePreview, setShowFilePreview] = useState(false); // New state to handle "See More" feature
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -66,17 +67,33 @@ const PostDetails = () => {
         {post.file_url && (
           <div className="mt-8 bg-gray-100 p-6 rounded-lg border border-gray-300">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Attached File</h3>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600 truncate">{post.file_name || "Downloadable File"}</span>
-              <a
-                href={post.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all"
-              >
-                Download
-              </a>
-            </div>
+            {showFilePreview ? (
+              // Display file preview
+              <div className="mt-4">
+                <iframe
+                  src={post.file_url}
+                  title="File Preview"
+                  className="w-full h-96 rounded-lg border border-gray-300"
+                ></iframe>
+                <button
+                  onClick={() => setShowFilePreview(false)} // Hide the preview
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+                >
+                  Close Preview
+                </button>
+              </div>
+            ) : (
+              // Show "See More" button
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 truncate">{post.file_name || "Preview File"}</span>
+                <button
+                  onClick={() => setShowFilePreview(true)} // Show the preview
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all"
+                >
+                  See More
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -9,6 +9,7 @@ import { coy } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const PostsList = () => {
   const [posts, setPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null); // State for currently selected post
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,13 +23,21 @@ const PostsList = () => {
           navigate('/signin'); // Redirect to login on unauthorized
         }
       }
-    };    
-    
+    };
+
     fetchPosts();
   }, []);
 
   const handleCreatePost = () => {
     navigate('/create-post');
+  };
+
+  const handleViewPost = (post) => {
+    setSelectedPost(post); // Set the selected post for inline preview
+  };
+
+  const handleClosePreview = () => {
+    setSelectedPost(null); // Clear the selected post
   };
 
   return (
@@ -43,14 +52,10 @@ const PostsList = () => {
         </button>
       </div>
 
-      {posts.map((post) => (
-        <div
-          key={post._id}
-          className="p-6 mb-6 border rounded-lg bg-gray-50 shadow-md transition-transform hover:scale-[1.01]"
-        >
-          <h3 className="text-xl font-semibold mb-2">{post.title}</h3>
-
-          {post.content && (
+      {selectedPost ? (
+        <div className="p-6 mb-6 border rounded-lg bg-gray-50 shadow-md">
+          <h3 className="text-xl font-semibold mb-2">{selectedPost.title}</h3>
+          {selectedPost.content && (
             <div className="my-4">
               <SyntaxHighlighter
                 language="javascript" // Adjust dynamically if needed
@@ -64,23 +69,64 @@ const PostsList = () => {
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                 }}
               >
-                {post.content}
+                {selectedPost.content}
               </SyntaxHighlighter>
             </div>
           )}
 
-          {post.file_url && (
-            <a
-              href={post.file_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 underline hover:text-blue-800"
-            >
-              View File
-            </a>
+          {selectedPost.file_url && (
+            <iframe
+              src={selectedPost.file_url}
+              title="File Preview"
+              className="w-full h-96 mt-4 border rounded-lg"
+            ></iframe>
           )}
+
+          <button
+            onClick={handleClosePreview}
+            className="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+          >
+            Close Preview
+          </button>
         </div>
-      ))}
+      ) : (
+        posts.map((post) => (
+          <div
+            key={post._id}
+            className="p-6 mb-6 border rounded-lg bg-gray-50 shadow-md transition-transform hover:scale-[1.01]"
+          >
+            <h3 className="text-xl font-semibold mb-2">{post.title}</h3>
+
+            {post.content && (
+              <div className="my-4">
+                <SyntaxHighlighter
+                  language="javascript" // Adjust dynamically if needed
+                  style={coy}
+                  customStyle={{
+                    backgroundColor: '#f5f7fa',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    overflowX: 'auto',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  {post.content}
+                </SyntaxHighlighter>
+              </div>
+            )}
+
+            {post.file_url && (
+              <button
+                onClick={() => handleViewPost(post)}
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                View File
+              </button>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 };

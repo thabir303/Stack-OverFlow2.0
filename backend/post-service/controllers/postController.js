@@ -82,7 +82,7 @@ exports.createPost = async (req, res) => {
             );
 
             const protocol = process.env.MINIO_USE_SSL === "true" ? "https" : "http";
-            fileUrl = `${protocol}://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${process.env.MINIO_BUCKET_NAME}/${uniqueFileName}`;
+            fileUrl = `${protocol}://localhost:${process.env.MINIO_PORT}/${process.env.MINIO_BUCKET_NAME}/${uniqueFileName}`;
             fileName = originalName;
         }
 
