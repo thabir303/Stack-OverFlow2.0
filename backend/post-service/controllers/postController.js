@@ -178,3 +178,16 @@ exports.getUserPosts = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+
+exports.getUserPostCount = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const postCount = await Post.countDocuments({ author_id: userId });
+
+        res.status(200).json({ success: true, postCount });
+    } catch (error) {
+        console.error("Error fetching post count:", error.message);
+        res.status(500).json({ message: "Server error." });
+    }
+};

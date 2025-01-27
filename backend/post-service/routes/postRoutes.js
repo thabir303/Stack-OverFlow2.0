@@ -1,6 +1,6 @@
 //backend/post-service/routes/postRoutes.js
 const express = require("express");
-const { getPosts, createPost, getUserPosts, getPostById } = require("../controllers/postController");
+const { getPosts, createPost, getUserPosts, getPostById, getUserPostCount } = require("../controllers/postController");
 const uploadMiddleware = require("../utils/uploadMiddleware");
 const authMiddleware = require("../utils/authMiddleware");
 
@@ -16,5 +16,7 @@ router.post("/", authMiddleware, uploadMiddleware, createPost);
 router.get("/user/:userId", authMiddleware, getUserPosts);
 
 router.get("/:postId", authMiddleware, getPostById); // Add this route
+
+router.get('/count/:userId', getUserPostCount);
 
 module.exports = router;
