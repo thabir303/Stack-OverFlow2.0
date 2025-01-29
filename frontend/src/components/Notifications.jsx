@@ -71,13 +71,14 @@ const Notifications = () => {
         )
       );
 
-      // If notification is expired and marked as seen, remove it from the UI immediately
-      if (new Date(expiresAt) < new Date()) {
-        const updatedNotifications = notifications.filter(
-          (notification) => notification._id !== notificationId
-        );
-        setNotifications(updatedNotifications);
-      }
+      // Ensure the notification is removed only if it is both expired and seen
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter(
+          (notification) =>
+            !(new Date(notification.expiresAt) < new Date() && notification.recipients.every((recipient) => recipient.isSeen))
+        )
+      );
+      
     } catch (error) {
       console.error("Error marking notification as seen:", error);
     }
