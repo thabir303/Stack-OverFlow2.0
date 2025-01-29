@@ -6,36 +6,39 @@ const axios = require('axios');
 // Get notifications for a specific user
 exports.getUserNotifications = async (req, res) => {
     try {
-        const userId = req.user.id; // Extract the user ID from the token
-
-        // Fetch notifications for the user
-        const notifications = await Notification.find({ recipient: userId }).sort({ createdAt: -1 });
-
-        // Fetch post details from post-service for each notification
-        const notificationsWithPosts = await Promise.all(
-            notifications.map(async (notification) => {
-                try {
-                    const postResponse = await axios.get(
-                        `http://post-service:8002/api/posts/${notification.postId}`,
-                        {
-                            headers: {
-                                Authorization: req.headers.authorization,
-                                "x-api-key": process.env.POST_SERVICE_API_KEY, 
-                            },
-                        }
-                    );
-                    return { ...notification._doc, post: postResponse.data }; // Combine notification and post details
-                } catch (error) {
-                    console.error(`Error fetching post ${notification.postId}:`, error.message);
-                    return { ...notification._doc, post: null }; // Add `post: null` if post fetch fails
-                }
-            })
-        );
-
-        res.status(200).json({ success: true, notifications: notificationsWithPosts });
+      const userId = req.user.id;
+      const currentTime = new Date();
+  
+      // Fetch notifications for the user that are not expired
+      const notifications = await Notification.find({
+        recipient: userId,
+        expiresAt: { $gte: currentTime }, // Only fetch notifications that haven't expired
+      }).sort({ createdAt: -1 });
+  
+      const notificationsWithPosts = await Promise.all(
+        notifications.map(async (notification) => {
+          try {
+            const postResponse = await axios.get(
+              `http://post-service:8002/api/posts/${notification.postId}`,
+              {
+                headers: {
+                  Authorization: req.headers.authorization,
+                  'x-api-key': process.env.POST_SERVICE_API_KEY,
+                },
+              }
+            );
+            return { ...notification._doc, post: postResponse.data };
+          } catch (error) {
+            console.error(`Error fetching post ${notification.postId}:`, error.message);
+            return { ...notification._doc, post: null }; // Add `post: null` if post fetch fails
+          }
+        })
+      );
+  
+      res.status(200).json({ success: true, notifications: notificationsWithPosts });
     } catch (error) {
-        console.error("Error fetching notifications:", error.message);
-        res.status(500).json({ message: "Server error." });
+      console.error('Error fetching notifications:', error.message);
+      res.status(500).json({ message: 'Server error.' });
     }
 };
 
@@ -45,18 +48,23 @@ exports.markNotificationAsSeen = async (req, res) => {
         const { notificationId } = req.params; // Get the notification ID from the request parameters
         const userId = req.user.id; // Get the current user ID
 
-        // Find and update the specific notification to mark it as "seen"
+        // Find the notification
         const notification = await Notification.findOne({ _id: notificationId, recipient: userId });
 
         if (!notification) {
             return res.status(404).json({ message: 'Notification not found.' });
         }
 
-        if (new Date(notification.expiresAt) < new Date()) {
-            // If the notification is expired, let the user mark it as seen anyway
-            notification.isSeen = true;
-            await notification.save();
+        // If notification is expired and is marked as seen, delete it from the database
+        const currentTime = new Date();
+        if (notification.expiresAt < currentTime && notification.isSeen) {
+            await Notification.deleteOne({ _id: notificationId });
+            return res.status(200).json({ success: true, message: 'Expired notification deleted after being marked as seen.' });
         }
+
+        // If notification is not expired, just mark it as seen
+        notification.isSeen = true;
+        await notification.save();
 
         res.status(200).json({ success: true, notification });
     } catch (error) {
@@ -74,7 +82,7 @@ exports.createNotification = async (req, res) => {
         const senderEmail = req.body.senderEmail; // Extract sender email from the token
 
         const expirationTime = new Date();
-        expirationTime.setMinutes(expirationTime.getMinutes() + 5); // Set 5 minutes expiration
+        expirationTime.setMinutes(expirationTime.getMinutes() + 1); // Set 5 minutes expiration
 
         console.log(`Decoded token for notifications:`, req.user);
 
