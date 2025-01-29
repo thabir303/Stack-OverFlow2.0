@@ -21,9 +21,9 @@ const Navbar = () => {
         },
       });
 
-      // Consider only the notifications that are unread and not expired
+      // Consider only the notifications that are unread and not expired for the current user
       const unread = response.data.notifications.filter(
-        (n) => !n.isSeen && new Date(n.expiresAt) > new Date()
+        (n) => !n.recipients.some((recipient) => recipient.userId === response.data.userId && recipient.isSeen) && new Date(n.expiresAt) > new Date()
       );
       setUnreadCount(unread.length);
     } catch (error) {

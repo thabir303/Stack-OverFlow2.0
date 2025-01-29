@@ -5,10 +5,17 @@ import { CheckCircle, BellOff } from "lucide-react";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
+  const [userId, setUserId] = useState(null);
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Decode the token to extract userId
+    const decodedToken = token ? JSON.parse(atob(token.split('.')[1])) : null;
+    if (decodedToken) {
+      setUserId(decodedToken.id);
+    }
+
     const fetchNotifications = async () => {
       try {
         const response = await axios.get(`http://localhost/api/notifications`, {
@@ -19,8 +26,11 @@ const Notifications = () => {
 
         const currentTime = new Date();
         const updatedNotifications = response.data.notifications.filter((notification) => {
-          // Show expired and unseen notifications, only hide when marked as seen
-          return notification.expiresAt >= currentTime || !notification.isSeen;
+          // Show expired and unseen notifications for the current user
+          return (
+            notification.expiresAt >= currentTime || 
+            !notification.recipients.some(recipient => recipient.userId === userId && recipient.isSeen)
+          );
         });
 
         setNotifications(updatedNotifications);
@@ -30,7 +40,7 @@ const Notifications = () => {
     };
 
     fetchNotifications();
-  }, []);
+  }, [token, userId]);
 
   const markAsSeen = async (notificationId, expiresAt) => {
     try {
@@ -45,11 +55,18 @@ const Notifications = () => {
         }
       );
 
-      // Update the UI immediately for seen notifications
+      // Update the UI immediately for seen notifications for the current user
       setNotifications((prev) =>
         prev.map((notification) =>
           notification._id === notificationId
-            ? { ...notification, isSeen: true }
+            ? {
+                ...notification,
+                recipients: notification.recipients.map((recipient) =>
+                  recipient.userId === userId
+                    ? { ...recipient, isSeen: true }
+                    : recipient
+                ),
+              }
             : notification
         )
       );
@@ -86,7 +103,10 @@ const Notifications = () => {
             <div
               key={notification._id}
               className={`p-6 rounded-lg shadow-sm transition-all border ${
-                notification.isSeen
+                notification.recipients.some(
+                  (recipient) =>
+                    recipient.userId === userId && recipient.isSeen
+                )
                   ? "bg-gray-200 border-gray-300"
                   : "bg-yellow-50 border-yellow-300"
               } hover:shadow-md hover:scale-105`}
@@ -100,7 +120,10 @@ const Notifications = () => {
                     Posted by: {notification.senderEmail || "Unknown"}
                   </p>
                 </div>
-                {!notification.isSeen && (
+                {!notification.recipients.some(
+                  (recipient) =>
+                    recipient.userId === userId && recipient.isSeen
+                ) && (
                   <CheckCircle
                     className="w-6 h-6 text-gray-400 hover:text-green-500 cursor-pointer"
                     onClick={() => markAsSeen(notification._id, notification.expiresAt)}
@@ -111,11 +134,17 @@ const Notifications = () => {
                 <button
                   onClick={() => markAsSeen(notification._id, notification.expiresAt)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                    notification.isSeen
+                    notification.recipients.some(
+                      (recipient) =>
+                        recipient.userId === userId && recipient.isSeen
+                    )
                       ? "bg-gray-400 text-gray-700"
                       : "bg-blue-500 text-white"
                   } hover:bg-blue-600`}
-                  disabled={notification.isSeen}
+                  disabled={notification.recipients.some(
+                    (recipient) =>
+                      recipient.userId === userId && recipient.isSeen
+                  )}
                 >
                   Mark as Seen
                 </button>

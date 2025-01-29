@@ -2,7 +2,7 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-    const apiKey = req.headers["x-api-key"];
+    const apiKey = "Abir";
     const authHeader = req.headers.authorization;
 
     // Debugging logs
@@ -13,7 +13,7 @@ const authMiddleware = (req, res, next) => {
     // Handle API Key authentication
     if (apiKey && apiKey === process.env.NOTIFICATION_SERVICE_API_KEY) {
         console.log("Authenticated using API Key.");
-        return next(); // Proceed if API Key is valid
+        // return next(); // Proceed if API Key is valid
     }
     console.log(`Hello ${apiKey}`);
     
