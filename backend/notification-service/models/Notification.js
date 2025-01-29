@@ -28,6 +28,10 @@ const notificationSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        expiresAt: {
+            type: Date, // Add expiresAt field
+            required: true, // This should be set during notification creation
+        },
     },
     { timestamps: true }
 );

@@ -7,12 +7,17 @@ const notificationCleaner = () => {
   cron.schedule('0 0 * * *', async () => {
     try {
       console.log('Running notification cleaner job...');
-      // Find notifications that have been seen by all users
-      const seenNotifications = await Notification.find({ isSeen: true });
 
-      // Delete seen notifications
-      const result = await Notification.deleteMany({ isSeen: true });
-      console.log(`Deleted ${result.deletedCount} seen notifications.`);
+      // Delete notifications that are seen and have expired
+      const result = await Notification.deleteMany({
+        isSeen: true,
+        expiresAt: { $lt: new Date() }, // Ensure the notification has expired
+      });
+
+      console.log(`Deleted ${result.deletedCount} seen and expired notifications.`);
+
+      // Optionally, you can add another condition to remove unseen expired notifications, 
+      // but for now, we will handle that when marking as seen.
     } catch (error) {
       console.error('Error running notification cleaner job:', error);
     }

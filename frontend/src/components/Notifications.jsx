@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../api/axios";
 import { CheckCircle, Eye, BellOff } from "lucide-react";
+import axios from "../api/axios";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -16,9 +16,11 @@ const Notifications = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log("Fetched notifications:", response.data.notifications);
-        // Filter out already seen notifications here
-        setNotifications(response.data.notifications.filter((n) => !n.isSeen));
+
+        const filteredNotifications = response.data.notifications.filter(
+          (notification) => !notification.isSeen && new Date(notification.expiresAt) > new Date()
+        );
+        setNotifications(filteredNotifications);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       }
@@ -57,9 +59,7 @@ const Notifications = () => {
 
   return (
     <div className="max-w-3xl mx-auto mt-10">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">
-        Notifications
-      </h2>
+      <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">Notifications</h2>
       {notifications.length === 0 ? (
         <div className="flex flex-col items-center text-gray-500 mt-20">
           <BellOff className="w-16 h-16 mb-4" />
@@ -74,11 +74,12 @@ const Notifications = () => {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-lg font-medium text-gray-800">
-                    {notification.message}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Posted by: {notification.senderEmail || "Unknown"}
+                  <p className="text-lg font-medium text-gray-800">{notification.message}</p>
+                  <p className="text-sm text-gray-500 mt-2">Posted by: {notification.senderEmail || "Unknown"}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {new Date(notification.expiresAt) < new Date()
+                      ? "This notification has expired."
+                      : ""}
                   </p>
                 </div>
                 <CheckCircle

@@ -46,14 +46,16 @@ exports.markNotificationAsSeen = async (req, res) => {
         const userId = req.user.id; // Get the current user ID
 
         // Find and update the specific notification to mark it as "seen"
-        const notification = await Notification.findOneAndUpdate(
-            { _id: notificationId, recipient: userId },
-            { isSeen: true },
-            { new: true } // Return the updated notification
-        );
+        const notification = await Notification.findOne({ _id: notificationId, recipient: userId });
 
         if (!notification) {
             return res.status(404).json({ message: 'Notification not found.' });
+        }
+
+        if (new Date(notification.expiresAt) < new Date()) {
+            // If the notification is expired, let the user mark it as seen anyway
+            notification.isSeen = true;
+            await notification.save();
         }
 
         res.status(200).json({ success: true, notification });
@@ -68,12 +70,11 @@ exports.createNotification = async (req, res) => {
     try {
         const { postId, message } = req.body;
 
-        // if (!req.user) {
-        //     return res.status(401).json({ message: "Unauthorized: Missing user information." });
-        // }
-
         const senderId = req.body.userId; // Extract sender ID from the token
         const senderEmail = req.body.senderEmail; // Extract sender email from the token
+
+        const expirationTime = new Date();
+        expirationTime.setMinutes(expirationTime.getMinutes() + 5); // Set 5 minutes expiration
 
         console.log(`Decoded token for notifications:`, req.user);
 
@@ -97,6 +98,7 @@ exports.createNotification = async (req, res) => {
             postId,
             message: `${message}`, // Include sender email
             isSeen: false,
+            expiresAt: expirationTime,
         }));
 
         const createdNotifications = await Notification.insertMany(notifications);

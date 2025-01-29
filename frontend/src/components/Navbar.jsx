@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from '../api/axios';
-import { Bell, LogOut, Home, User } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Bell, LogOut, Home, User } from "lucide-react";
+import axios from "../api/axios";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -9,29 +9,34 @@ const Navbar = () => {
 
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        navigate('/signin');
+        navigate("/signin");
         return;
       }
+
       const response = await axios.get(`http://localhost/api/notifications`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      const unread = response.data.notifications.filter((n) => !n.isSeen).length;
-      setUnreadCount(unread);
+
+      // Consider only the notifications that are unread and not expired
+      const unread = response.data.notifications.filter(
+        (n) => !n.isSeen && new Date(n.expiresAt) > new Date()
+      );
+      setUnreadCount(unread.length);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error("Error fetching notifications:", error);
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        navigate('/signin');
+        localStorage.removeItem("token");
+        navigate("/signin");
       }
     }
   };
 
   const handleNotificationClick = () => {
-    navigate('/notifications');
+    navigate("/notifications");
   };
 
   useEffect(() => {
@@ -43,8 +48,8 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/signin');
+    localStorage.removeItem("token");
+    navigate("/signin");
   };
 
   return (
@@ -53,8 +58,8 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
           <div className="flex-shrink-0">
-            <h1 
-              onClick={() => navigate('/posts')}
+            <h1
+              onClick={() => navigate("/posts")}
               className="text-2xl font-bold text-white cursor-pointer hover:text-blue-400 transition-colors duration-200"
             >
               StackOverflow
@@ -64,8 +69,8 @@ const Navbar = () => {
           {/* Navigation Items */}
           <div className="flex items-center space-x-8">
             {/* Home Button */}
-            <button 
-              onClick={() => navigate('/posts')}
+            <button
+              onClick={() => navigate("/posts")}
               className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200"
             >
               <Home className="w-4 h-4" />
@@ -73,7 +78,7 @@ const Navbar = () => {
             </button>
 
             {/* Notifications Button */}
-            <button 
+            <button
               onClick={handleNotificationClick}
               className="relative text-gray-300 hover:text-white p-2 rounded-full hover:bg-gray-700 transition-all duration-200"
             >
@@ -86,8 +91,8 @@ const Navbar = () => {
             </button>
 
             {/* Profile Button */}
-            <button 
-              onClick={() => navigate('/profile')}
+            <button
+              onClick={() => navigate("/profile")}
               className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200"
             >
               <User className="w-4 h-4" />
@@ -95,7 +100,7 @@ const Navbar = () => {
             </button>
 
             {/* Logout Button */}
-            <button 
+            <button
               onClick={handleLogout}
               className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md"
             >
