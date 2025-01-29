@@ -19,7 +19,7 @@ exports.getUserNotifications = async (req, res) => {
           notifications.map(async (notification) => {
               try {
                   const postResponse = await axios.get(
-                      `http://post-service:8002/api/posts/${notification.postId}`,
+                      `http://gateway/api/posts/${notification.postId}`,
                       {
                           headers: {
                               Authorization: req.headers.authorization,
@@ -98,7 +98,7 @@ exports.createNotification = async (req, res) => {
         console.log(`Decoded token for notifications:`, req.user);
 
         // Find all users except the sender
-        const response = await axios.get("http://user-service:8001/api/auth", {
+        const response = await axios.get("http://gateway/api/auth", {
             headers: {
                 "x-api-key": process.env.USER_SERVICE_API_KEY,
                 Authorization: req.headers.authorization,

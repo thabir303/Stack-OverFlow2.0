@@ -111,7 +111,7 @@ exports.createPost = async (req, res) => {
             console.log("Notification Payload:", notificationPayload);
         
             const response = await axios.post(
-                "http://notification-service:8003/api/notifications",
+                "http://gateway/api/notifications",
                 notificationPayload,
                 {
                     headers: {
