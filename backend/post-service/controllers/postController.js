@@ -159,25 +159,25 @@ exports.getPostById = async (req, res) => {
 
 
 // Fetch posts by a specific user
-exports.getUserPosts = async (req, res) => {
-    try {
-        const { userId } = req.params;
+// exports.getUserPosts = async (req, res) => {
+//     try {
+//         const { userId } = req.params;
 
-        // Find posts by user ID
-        const userPosts = await Post.find({ author_id: userId }).sort({
-            createdAt: -1,
-        });
+//         // Find posts by user ID
+//         const userPosts = await Post.find({ author_id: userId }).sort({
+//             createdAt: -1,
+//         });
 
-        if (!userPosts.length) {
-            return res.status(404).json({ success: false, message: "No posts found for this user." });
-        }
+//         if (!userPosts.length) {
+//             return res.status(404).json({ success: false, message: "No posts found for this user." });
+//         }
 
-        res.status(200).json({ success: true, posts: userPosts });
-    } catch (err) {
-        console.error("Error fetching user posts:", err);
-        res.status(500).json({ error: "Server error" });
-    }
-};
+//         res.status(200).json({ success: true, posts: userPosts });
+//     } catch (err) {
+//         console.error("Error fetching user posts:", err);
+//         res.status(500).json({ error: "Server error" });
+//     }
+// };
 
 exports.getUserPostCount = async (req, res) => {
     try {
