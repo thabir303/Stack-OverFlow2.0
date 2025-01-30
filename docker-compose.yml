@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   user-service:
@@ -32,9 +32,9 @@ services:
     depends_on:
       - mongo_notifications
 
-  gateway:
+  proxy:
     build:
-      context: ./backend/gateway
+      context: ./backend/proxy
     ports:
       - "80:80"
     depends_on:
@@ -69,7 +69,7 @@ services:
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
-      - "9001:9001" 
+      - "9001:9001"
     environment:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
@@ -83,7 +83,7 @@ services:
   #   ports:
   #     - "5173:5173"
   #   depends_on:
-  #     - gateway
+  #     - proxy
 
 volumes:
   mongo-data-users:

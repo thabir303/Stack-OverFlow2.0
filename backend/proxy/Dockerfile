@@ -1,4 +1,4 @@
-# backend/gateway/Dockerfile
+# backend/proxy/Dockerfile
 FROM nginx:latest
 
 COPY nginx.conf /etc/nginx/nginx.conf
