@@ -102,7 +102,6 @@ exports.createPost = async (req, res) => {
 
     await newPost.save();
 
-    // Send notification
     try {
       const notificationPayload = {
         postId: newPost._id,
@@ -120,7 +119,7 @@ exports.createPost = async (req, res) => {
           headers: {
             "x-api-key": process.env.NOTIFICATION_SERVICE_API_KEY,
             Authorization: req.headers.authorization, // Forward user token
-            "Content-Type": "application/json",
+            // "Content-Type": "application/json",
           },
         }
       );
